@@ -1,9 +1,9 @@
 {
   "name": "cosmo-chat",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.ts",
   "scripts": {
-    "dev": "nodemon src/server.ts"
+    "dev": "nodemon server.ts"
   },
   "keywords": [],
   "author": "",
