@@ -1,7 +1,7 @@
 import joi from 'joi';
 
 
-export const userSchema = joi.object({
+export const registerUserSchema = joi.object({
     username: joi.string().min(3).max(30).required(),
     email: joi.string().email().required(),
     password: joi.string().min(6).max(100).required(),
@@ -13,6 +13,12 @@ export const userSchema = joi.object({
     followers: joi.number().integer().default(0),
     lastSeen : joi.date()
 });
+
+export const loginUserSchema = joi.object({
+    email: joi.string().email().required(),
+    password: joi.string().min(6).max(100).required()
+});
+
 
 export const postSchema = joi.object({
     userId: joi.string().required(),

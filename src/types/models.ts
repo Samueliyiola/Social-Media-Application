@@ -1,7 +1,7 @@
 import {Schema, Document} from 'mongoose';
 
 export interface IUser extends Document {
-    id: string;
+    _id: string;
     username: string;
     email: string;
     password: string;
@@ -17,7 +17,7 @@ export interface IUser extends Document {
   }
   
   export interface IPost extends Document {
-    id : string;
+    _id : string;
     userId: string; 
     content: string;
     mediaUrl?: string;
@@ -25,7 +25,7 @@ export interface IUser extends Document {
   }
   
   export interface IComment extends Document {
-    id: string;
+    _id: string;
     postId: string;
     userId: string;
     text: string;
@@ -33,13 +33,13 @@ export interface IUser extends Document {
   }
   
   export interface ILike extends Document {
-    id: string;
+    _id: string;
     userId: string;
     postId: string;
   }
   
   export interface IMessage extends Document {
-    id: string;
+    _id: string;
     senderId: string;
     receiverId: string;
     text: string;
@@ -50,7 +50,7 @@ export interface IUser extends Document {
   }
   
 export interface INotification extends Document {
-    id: string;
+    _id: string;
     userId: string;
     type: string; // e.g., "like", "comment", "follow"
     senderId: string;
@@ -59,12 +59,13 @@ export interface INotification extends Document {
   }
   
   export interface IFollow extends Document {
+    _id: string;
     followerId: string;
     followingId: string;
   }
   
   export interface IBookmark extends Document {
-    id: string;
+    _id: string;
     userId: string;
     postId: string; 
     createdAt?: Date;
