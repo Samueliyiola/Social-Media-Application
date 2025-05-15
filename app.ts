@@ -1,6 +1,7 @@
 import express from "express";
 import errorHandler from "./src/middlewares/errorHandler"; //Global error handler
 const app = express();
+// import "./src/@types/express/index.d";
 import {authRouter} from "./src/routes/auth.routes"; // Import your routes
 import {userRouter} from "./src/routes/user.routes"; // Import your routes
 

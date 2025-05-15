@@ -33,7 +33,7 @@ export const controllerHandler = (
 
       //Standardize successful response if controller returned something
       if (result && typeof result === "object") {
-        const { code = 200, ...data } = result;7
+        const { code = 200, ...data } = result;
         // Check if response was already sent (to avoid setting headers after response)
         if (!res.headersSent) {
             return responseHandler.success(res, code, data);

@@ -29,3 +29,10 @@ export interface ValidationSchema {
   querySchema?: Joi.ObjectSchema;  // Schema for validating the request query
 }
 
+// Define the UserPayload interface for JWT payload
+export interface UserPayload {
+  _id: string; // User ID
+  email: string; // User email
+  // iat?: number; // Issued at time (optional)
+  // exp?: number; // Expiration time (optional)
+}

@@ -6,11 +6,17 @@ import { IUser } from '../types/models';
 import AppError from '../utils/AppError';
 // import mongoose from 'mongoose';
 import User from '../models/user';
+import { UserPayload } from '../types/types';
+import  VerificationCode from '../models/verificationCode';
 import {signToken, verifyToken, decodeToken} from '../utils/jwtHelper';
+import { JwtPayload } from 'jsonwebtoken';
+import { otpService} from '../services/otpService';
+// import "../types/express/index.d.ts";
+
 
 const authController = {
 
-    registerUser : catchAsync(async (req: Request , res : Response, next : NextFunction): Promise<any> => {
+    registerUser :  catchAsync(async (req: Request , res : Response, next : NextFunction): Promise<any> => {
         const { username, email, password, profilePicture, bio, birthdate } = req.body;
         const findUser = await User.findOne({ email });
         if(findUser){
@@ -34,7 +40,7 @@ const authController = {
         return responseHandler.success(res, 201, { message: "User created successfully", user: safeUser });
     }),
 
-    loginUser : async (req: Request , res : Response, next: NextFunction): Promise<any> => {
+    loginUser : catchAsync(async (req: Request , res : Response, next: NextFunction): Promise<any> => {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
         if (!user) {
@@ -46,19 +52,52 @@ const authController = {
         }
         const token = signToken(user._id, user.email);
         return responseHandler.success(res, 200, { message: "Login successful", token });
-    },
+    }),
 
-    getAllUsers : async(req: Request , res : Response): Promise<any> => {
+    getAllUsers : catchAsync(async(req: Request , res : Response, next: NextFunction): Promise<any> => {
         const users = await User.find({}) // Exclude password field
         if (!users) {
             return next(new AppError("No users found", 404));
         }
         return responseHandler.success(res, 200, { message: "Users fetched successfully", users });
-    }
-};
+    }),
+
+    sendOtp : catchAsync(async (req: Request , res : Response, next: NextFunction): Promise<any> => {
+        const user = res.locals.user;
+        if(!user){
+            return next(new AppError("User not found", 404));
+        }
+        const theuser = await User.findOne({ email: user.email });
+        if (!theuser) {
+            return next(new AppError("User not found", 404));
+        }
+        await otpService(theuser);
+        return responseHandler.success(res, 200, { message: "OTP sent successfully" });
+
+    }),
+
+    verifyOtp : catchAsync(async (req: Request , res : Response, next: NextFunction): Promise<any> => {
+        const { otp } = req.body;
+        const theuser = res.locals.user;
+        if(!theuser){
+            return next(new AppError("User not found", 404));
+        }
+        const user = await User.findOne({email: theuser.email});
+        if (!user) {
+            return next(new AppError("User not found", 404));
+        }
+        const verificationCode = await VerificationCode.findOne({ userId: user._id });
+        if (!verificationCode) {
+            return next(new AppError("Verification code not found", 404));
+        }
+        if (verificationCode.code !== otp) {
+            res.json(res.locals.user);
+            return next(new AppError("Invalid OTP", 401));
+        }
+        user.isVerified = true;
+        await user.save();
+        return responseHandler.success(res, 200, { message: "User verified successfully" });
+        
+})};
 
 export default authController;
-
-function next(arg0: AppError): any {
-    throw new Error('Function not implemented.');
-}

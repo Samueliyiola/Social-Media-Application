@@ -70,3 +70,10 @@ export interface INotification extends Document {
     postId: string; 
     createdAt?: Date;
   }
+
+  export interface IVerificationCode extends Document {
+    _id: string;
+    userId: string;
+    code : number;
+    expiryTime: Date;
+  }
