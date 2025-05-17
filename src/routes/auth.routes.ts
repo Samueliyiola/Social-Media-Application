@@ -6,8 +6,8 @@ import { registerUserSchema, loginUserSchema } from '../validation/schemaValidat
 
 export const authRouter = Router();
 
-authRouter.post('/register', authController.registerUser);
-authRouter.post('/login', authController.loginUser);
+authRouter.post('/register', controllerHandler(authController.registerUser, { bodySchema: registerUserSchema }));
+authRouter.post('/login', controllerHandler(authController.loginUser, { bodySchema: loginUserSchema }));
 authRouter.post('/send-otp', verifyUser, controllerHandler(authController.sendOtp));
 authRouter.post('/verify-otp', verifyUser, controllerHandler(authController.verifyOtp));
 // authRouter.post('/verify-email', controllerHandler(authController.verifyEmail));

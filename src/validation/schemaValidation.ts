@@ -1,65 +1,64 @@
-import joi from 'joi';
+import Joi from 'joi';
+// import { ValidationSchema } from '../types/types';
 
-
-export const registerUserSchema = joi.object({
-    username: joi.string().min(3).max(30).required(),
-    email: joi.string().email().required(),
-    password: joi.string().min(6).max(100).required(),
-    profilePicture: joi.string().uri(),
-    bio: joi.string().max(160),
-    birthdate : joi.date().required(),
-    isVerified: joi.boolean().default(false),
-    following: joi.number().integer().default(0),
-    followers: joi.number().integer().default(0),
-    lastSeen : joi.date()
+export const registerUserSchema = Joi.object({
+    username: Joi.string().min(3).max(30).required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).max(100).required(),
+    profilePicture: Joi.string().uri(),
+    bio: Joi.string().max(160),
+    birthdate : Joi.date().required(),
+    isVerified: Joi.boolean().default(false),
+    following: Joi.number().integer().default(0),
+    followers: Joi.number().integer().default(0),
+    lastSeen : Joi.date()
 });
 
-export const loginUserSchema = joi.object({
-    email: joi.string().email().required(),
-    password: joi.string().min(6).max(100).required()
+export const loginUserSchema = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).max(100).required()
 });
 
 
-export const postSchema = joi.object({
-    userId: joi.string().required(),
-    content: joi.string().required(),
-    mediaUrl: joi.string().uri()
+export const postSchema = Joi.object({
+    content: Joi.string().required(),
+    mediaUrl: Joi.string().uri()
 });
 
-export const commentSchema = joi.object({
-    postId: joi.string().required(),
-    userId: joi.string().required(),
-    text: joi.string().required()
+export const commentSchema = Joi.object({
+    postId: Joi.string().required(),
+    userId: Joi.string().required(),
+    text: Joi.string().required()
 });
 
-export const likeSchema = joi.object({
-    userId: joi.string().required(),
-    postId: joi.string().required()
+export const likeSchema = Joi.object({
+    userId: Joi.string().required(),
+    postId: Joi.string().required()
 });
 
-export const messageSchema = joi.object({
-    senderId: joi.string().required(),
-    receiverId: joi.string().required(),
-    text: joi.string().required(),
-    mediaUrl: joi.string().uri(),
-    isRead: joi.date(),
-    deleted: joi.boolean()
+export const messageSchema = Joi.object({
+    senderId: Joi.string().required(),
+    receiverId: Joi.string().required(),
+    text: Joi.string().required(),
+    mediaUrl: Joi.string().uri(),
+    isRead: Joi.date(),
+    deleted: Joi.boolean()
 });
 
-export const notificationSchema = joi.object({
-    userId: joi.string().required(),
-    type: joi.string().valid('like', 'comment', 'follow').required(),
-    senderId: joi.string().required(),
-    message: joi.string(),
+export const notificationSchema = Joi.object({
+    userId: Joi.string().required(),
+    type: Joi.string().valid('like', 'comment', 'follow').required(),
+    senderId: Joi.string().required(),
+    message: Joi.string(),
 });
 
-export const followSchema = joi.object({
-    followerId: joi.string().required(),
-    followingId: joi.string().required()
+export const followSchema = Joi.object({
+    followerId: Joi.string().required(),
+    followingId: Joi.string().required()
 });
 
-export const bookmarkSchema = joi.object({
-    userId: joi.string().required(),
-    postId: joi.string().required()
+export const bookmarkSchema = Joi.object({
+    userId: Joi.string().required(),
+    postId: Joi.string().required()
 });
 

@@ -5,6 +5,7 @@ const postSchema = new mongoose.Schema<IPost>({
     userId: { type: String, required: true },
     content: { type: String, required: true },
     mediaUrl: { type: String },
+    likes : { type: Number, default: 0 },
     }, {
     timestamps: true,
 })

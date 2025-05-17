@@ -3,7 +3,9 @@ import { IComment } from "../types/models";
 const commentSchema = new mongoose.Schema<IComment>({
     postId: { type: String, required: true },
     userId: { type: String, required: true },
-    text: { type: String, required: true },
+    content: { type: String, required: true },
+    likes: { type: Number, default: 0 },
+    mediaUrl: { type: String }
 }, {
     timestamps: true,
 });

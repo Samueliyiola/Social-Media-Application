@@ -20,6 +20,7 @@ export interface IUser extends Document {
     _id : string;
     userId: string; 
     content: string;
+    likes: number;
     mediaUrl?: string;
     createdAt?: Date;
   }
@@ -28,7 +29,9 @@ export interface IUser extends Document {
     _id: string;
     postId: string;
     userId: string;
-    text: string;
+    content: string;
+    likes: number;
+    mediaUrl?: string;
     createdAt?: Date;
   }
   
