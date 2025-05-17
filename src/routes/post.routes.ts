@@ -1,6 +1,7 @@
 import {Router} from 'express';
 import { controllerHandler } from '../middlewares/controllerHandler';
 import postController  from '../controllers/post.controller';
+import commentController from "../controllers/comment.controller";
 import {verifyUser} from '../middlewares/verifyUser';
 import {postSchema }from '../validation/schemaValidation';
 // import {ValidationSchema} from '../types/types';
@@ -14,5 +15,13 @@ postRouter.delete("/:id", verifyUser, controllerHandler(postController.deletePos
 // For likes
 postRouter.post("/:id/like", verifyUser, controllerHandler(postController.toggleLike));
 postRouter.get("/:id/likes", verifyUser, controllerHandler(postController.getPostLikes));
+
+// For Comments
+postRouter.post("/:id/comments", verifyUser, controllerHandler(commentController.createComment));
+postRouter.get("/:id/comments", controllerHandler(commentController.viewAllComments));
+postRouter.delete("/comments/:id", verifyUser, controllerHandler(commentController.deleteComment));
+postRouter.post("/comments/:id/like", verifyUser, controllerHandler(commentController.toggleLike));
+postRouter.get("/comments/:id/likes", verifyUser, controllerHandler(commentController.getCommentLikes));
+
 
 export default postRouter;
