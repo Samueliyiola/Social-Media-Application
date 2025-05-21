@@ -11,8 +11,6 @@ const userSchema = new mongoose.Schema<IUser>(
     bio: { type: String },
     birthdate : { type : Date, required : true},
     isVerified: { type: Boolean, default: false },
-    following: { type: Number, default: 0 },
-    followers: { type: Number, default: 0 },
     lastSeen : {type : Date}
   },
   {

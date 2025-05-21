@@ -11,8 +11,6 @@ export interface IUser extends Document {
     updatedAt?: Date;
     birthdate : Date;
     isVerified?: boolean;
-    following?: number;
-    followers?: number;
     lastSeen? : Date;
   }
   

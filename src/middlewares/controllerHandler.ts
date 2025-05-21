@@ -5,6 +5,7 @@ import { validateIncomingRequest } from "../validation/joiValidation";
 import AppError from "../utils/AppError";
 import responseHandler from "../utils/responseHandler"; 
 
+
 const parseControllerArgs = (req: Request) => ({
   body: req.body,
   params: req.params,

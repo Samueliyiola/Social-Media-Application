@@ -21,7 +21,7 @@ const commentController = {
         if (!post) {
             return next(new AppError("Post not found", 404));
         }
-        const newComment = await Comment.create({ userId, postId, content, mediaUrl });
+        const newComment = await Comment.create({ postId,  userId, content, mediaUrl });
         if (!newComment) {
             return next(new AppError("Failed to create comment", 500));
         }
@@ -34,7 +34,7 @@ const commentController = {
         if(!post){
             return next(new AppError("Post not found!", 404));
         }
-        const comments = Comment.find({postId});
+        const comments = await Comment.find({postId});
         if(!comments){
             return next(new AppError("No comments found!", 404));
         }
@@ -72,7 +72,7 @@ const commentController = {
         if(likeExists){
             await Like.findByIdAndDelete({ _id: likeExists._id });
         }
-        const like = await Like.create({ userId, PostId : commentId });
+        const like = await Like.create({ userId, postId : commentId });
         if (!like) {
             return next(new AppError("Failed to like comment", 500));
         }

@@ -23,5 +23,4 @@ postRouter.delete("/comments/:id", verifyUser, controllerHandler(commentControll
 postRouter.post("/comments/:id/like", verifyUser, controllerHandler(commentController.toggleLike));
 postRouter.get("/comments/:id/likes", verifyUser, controllerHandler(commentController.getCommentLikes));
 
-
 export default postRouter;
