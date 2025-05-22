@@ -5,6 +5,7 @@ import { Request, Response, NextFunction } from "express";
 import catchAsync from "../utils/catchAsync";
 import responseHandler from "../utils/responseHandler";
 import AppError from "../utils/AppError";
+import {uploadMultipleImages} from "../services/cloudinaryService";
 
 const postController = {
     createPost: catchAsync(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
@@ -12,8 +13,13 @@ const postController = {
             return next(new AppError("You are not authorized to do this!", 401));
         }
         const userId = res.locals.user.userId;
-        const {content, mediaUrl } = req.body;
-        const newPost = await Post.create({ userId, content, mediaUrl });
+        // const {content, mediaUrl } = req.body;
+        const {content} = req.body;
+        let media: { url: string; public_id: string; }[] = [];
+        if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+            media = await uploadMultipleImages(req.files);
+        }
+        const newPost = await Post.create({ userId, content, media});
         if (!newPost) {
             return next(new AppError("Failed to create post", 500));
         }

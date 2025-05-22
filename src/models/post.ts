@@ -4,7 +4,12 @@ import { IPost } from "../types/models";
 const postSchema = new mongoose.Schema<IPost>({
     userId: { type: String, required: true },
     content: { type: String, required: true },
-    mediaUrl: { type: String },
+    media: [
+        {
+        url: { type: String, required: true },
+        public_id: { type: String, required: true },
+        }
+    ],
     likes : { type: Number, default: 0 },
     }, {
     timestamps: true,

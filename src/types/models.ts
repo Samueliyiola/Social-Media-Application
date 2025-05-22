@@ -5,7 +5,9 @@ export interface IUser extends Document {
     username: string;
     email: string;
     password: string;
-    profilePicture?: string;
+    // profilePicture?: string;
+    profilePictureUrl?: { type: String },
+    profilePictureId?: { type: String },
     bio?: string;
     createdAt?: Date;
     updatedAt?: Date;
@@ -19,7 +21,8 @@ export interface IUser extends Document {
     userId: string; 
     content: string;
     likes: number;
-    mediaUrl?: string;
+    // mediaUrl?: string;
+    media?: { url: string; public_id: string }[];
     createdAt?: Date;
   }
   

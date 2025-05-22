@@ -11,20 +11,31 @@ import  VerificationCode from '../models/verificationCode';
 import {signToken, verifyToken, decodeToken} from '../utils/jwtHelper';
 import { JwtPayload } from 'jsonwebtoken';
 import { otpService} from '../services/otpService';
+import {uploadSingleImage} from '../services/cloudinaryService';
 // import "../types/express/index.d.ts";
 
 
 const authController = {
 
     registerUser :  catchAsync(async (req: Request , res : Response, next : NextFunction): Promise<any> => {
-        const { username, email, password, profilePicture, bio, birthdate } = req.body;
+        // const { username, email, password, profilePicture, bio, birthdate } = req.body;
+        const { username, email, password, bio, birthdate } = req.body;
         const findUser = await User.findOne({ email });
         if(findUser){
             // return responseHandler.error(res, { statusCode: 409, message: "User already exists" });
             return next(new AppError("User already exists", 409));
         }
+        //Adding photo via cloudinary service
+        let profilePictureUrl = '';
+        let profilePictureId = '';
+
+        if (req.file) {
+            const uploadResult = await uploadSingleImage(req.file.buffer);
+            profilePictureUrl = uploadResult.url;
+            profilePictureId = uploadResult.public_id;
+        }
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = await User.create({ username, email, password : hashedPassword, profilePicture, bio, birthdate });
+        const newUser = await User.create({ username, email, password : hashedPassword, profilePictureUrl, profilePictureId, bio, birthdate });
         if (!newUser) {
             // return responseHandler.error(res, { statusCode: 409, message: "User not created" });
             return next(new AppError("User not created", 409));
