@@ -39,6 +39,33 @@ export const deleteImage = (publicId: string): Promise<void> => {
 };
 
 
+export const deleteImages = (publicIds: string[] | string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    if (typeof publicIds === 'string') {
+      // Single deletion
+      cloudinary.uploader.destroy(publicIds, (error, result) => {
+        if (error || result?.result !== 'ok') {
+          return reject(error || new Error(`Failed to delete image: ${publicIds}`));
+        }
+        resolve();
+      });
+    } else if (Array.isArray(publicIds)) {
+      // Bulk deletion
+      cloudinary.api.delete_resources(publicIds, (error, result) => {
+        if (error) return reject(error);
+        
+        const failed = publicIds.filter(id => result.deleted[id] !== 'deleted');
+        if (failed.length > 0) {
+          return reject(new Error(`Failed to delete image(s): ${failed.join(', ')}`));
+        }
+
+        resolve();
+      });
+    } else {
+      reject(new Error('Invalid input: must be a string or array of strings'));
+    }
+  });
+};
 
 
 
