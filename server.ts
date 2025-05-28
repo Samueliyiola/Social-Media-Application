@@ -5,7 +5,20 @@ import dotenv from "dotenv";
 import {Request, Response} from "express";
 import { connectDB, disconnectDB} from "./src/config/db";
 import catchAsync from "./src/utils/catchAsync";
+import {Server} from "socket.io";
+import setupSocketServer from "./src/config/socket";
 dotenv.config();
+
+
+const io = new Server(server, {
+  cors: {
+    origin: "*", // Set frontend URL in production
+    methods: ["GET", "POST"]
+  }
+});
+
+// Set up WebSocket logic
+setupSocketServer(io);
 
 
 const PORT = process.env.PORT || 3000;
