@@ -7,7 +7,7 @@ const messageSchema = new mongoose.Schema<IMessage>(
     receiverId: { type: String, required: true },
     text: { type: String, required: true },
     mediaUrl: { type: String },
-    isRead: { type: Date },
+    seen: { type: Boolean, default: false },
     deleted : {type : Boolean, default : false}
   },
   {

@@ -32,7 +32,7 @@ export interface IUser extends Document {
     userId: string;
     content: string;
     likes: number;
-    mediaUrl?: string;
+    media?: string;
     createdAt?: Date;
   }
   
@@ -49,7 +49,7 @@ export interface IUser extends Document {
     text: string;
     mediaUrl?: string;
     createdAt?: Date;
-    isRead?: Date;
+    seen?: boolean;
     deleted?: boolean;
   }
   
