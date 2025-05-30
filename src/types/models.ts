@@ -32,7 +32,7 @@ export interface IUser extends Document {
     userId: string;
     content: string;
     likes: number;
-    media?: string;
+    mediaUrl?: string;
     createdAt?: Date;
   }
   

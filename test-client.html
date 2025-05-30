@@ -1,0 +1,46 @@
+<!-- test-client.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Socket Test</title>
+</head>
+<body>
+  <h2>Socket Chat Test</h2>
+  <input type="text" id="receiverId" placeholder="Receiver ID" />
+  <input type="text" id="message" placeholder="Message" />
+  <button onclick="sendMessage()">Send</button>
+
+  <pre id="log"></pre>
+
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script>
+    const token = "YOUR_VALID_JWT_TOKEN_HERE";
+
+    const socket = io("http://localhost:3000", {
+      auth: {
+        token
+      }
+    });
+
+    socket.on("connect", () => log("✅ Connected"));
+    socket.on("message-sent", (msg) => log("✅ Sent: " + JSON.stringify(msg)));
+    socket.on("receive-message", (msg) => log("📨 Received: " + JSON.stringify(msg)));
+    socket.on("user-online", (id) => log(`👤 User online: ${id}`));
+    socket.on("user-offline", (id) => log(`👤 User offline: ${id}`));
+    socket.on("connect_error", (err) => log("❌ Connect error: " + err.message));
+
+    function sendMessage() {
+      const receiverId = document.getElementById("receiverId").value;
+      const text = document.getElementById("message").value;
+
+      socket.emit("send-message", { receiverId, text, mediaUrl: null });
+    }
+
+    function log(message) {
+      const logEl = document.getElementById("log");
+      logEl.textContent += message + "\n";
+    }
+  </script>
+</body>
+</html>

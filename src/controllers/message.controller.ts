@@ -32,7 +32,24 @@ const messageController = {
         return responseHandler.success(res, HttpStatus.OK, { message: "Conversation fetched successfully", messages });
     }),
 
-    
+  
+    markMessageAsSeen : catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+        const userId = res.locals.userId;
+        const messageId = req.params.id;
+
+        const messageSeen = await Message.findById(messageId);
+
+        if (!messageSeen || messageSeen.receiverId.toString() !== userId) {
+            return next(new AppError("Message not found or you are not the receiver", HttpStatus.NOT_FOUND));
+        }
+
+        messageSeen.seen = true;
+        await messageSeen.save();
+
+        responseHandler.success(res, HttpStatus.OK, { message: "Message marked as seen successfully", messageSeen });
+    }),
+
+
     // sendMessage: catchAsync(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     //     if(!res.locals.user) {
     //         return next(new AppError("You are not authorized to do this!", HttpStatus.UNAUTHORIZED));

@@ -1,5 +1,6 @@
 // src/config/socket.ts
 import { Server, Socket } from "socket.io";
+import { verifyUser} from "../middlewares/verifyUser";
 import jwt from "jsonwebtoken";
 import Message from "../models/message";
 
