@@ -6,7 +6,12 @@ const messageSchema = new mongoose.Schema<IMessage>(
     senderId: { type: String, required: true },
     receiverId: { type: String, required: true },
     text: { type: String, required: true },
-    mediaUrl: { type: String },
+    media: [
+        {
+        url: { type: String, required: true },
+        public_id: { type: String, required: true },
+        }
+    ],
     seen: { type: Boolean, default: false },
     deleted : {type : Boolean, default : false}
   },

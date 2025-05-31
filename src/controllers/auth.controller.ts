@@ -63,7 +63,7 @@ const authController = {
             return next(new AppError("Invalid email or password", HttpStatus.UNAUTHORIZED));
         }
         const token = signToken(user._id, user.email);
-        return responseHandler.success(res, HttpStatus.OK, { message: "Login successful", token });
+        return responseHandler.success(res, HttpStatus.OK, { message: "Login successful", token, user });
     }),
 
     getAllUsers : catchAsync(async(req: Request , res : Response, next: NextFunction): Promise<any> => {

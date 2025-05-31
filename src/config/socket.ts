@@ -1,8 +1,11 @@
 // src/config/socket.ts
 import { Server, Socket } from "socket.io";
-import { verifyUser} from "../middlewares/verifyUser";
+// import { verifyUser} from "../middlewares/verifyUser";
 import jwt from "jsonwebtoken";
 import Message from "../models/message";
+import { UserPayload } from '../types/types';
+import {verifyToken} from "../utils/jwtHelper";
+import { uploadBase64Images } from "../services/cloudinaryService";
 
 const onlineUsers = new Map<string, string>();       // userId -> socket.id
 const userSocketMap = new Map<string, string>();     // socket.id -> userId
@@ -16,8 +19,9 @@ export default function setupSocketServer(io: Server) {
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
-      socket.data.userId = decoded.id;
+      const decoded = verifyToken(token) as UserPayload;
+      socket.data.userId = decoded.userId;
+      // console.log("Socket authenticated with userId:", decoded);
       next();
     } catch (err) {
       console.error("JWT verification failed:", err);
@@ -29,7 +33,7 @@ export default function setupSocketServer(io: Server) {
   io.on("connection", (socket: Socket) => {
     const userId = socket.data.userId;
 
-    console.log("New socket connection from user:", userId);
+    console.log("New socket connection from user:", socket.data.userId );
 
     // Register user
     onlineUsers.set(userId, socket.id);
@@ -39,15 +43,26 @@ export default function setupSocketServer(io: Server) {
     // Handle sending messages
     socket.on("send-message", async (data) => {
       const senderId = socket.data.userId; // from JWT auth
-      const { receiverId, text, mediaUrl } = data;
-
+      const { receiverId, text, mediaFiles } = data;
+      if (!receiverId) {
+        return socket.emit("message-error", "Receiver ID is required");
+      }
+      let media: any = [];
+      if (mediaFiles?.length) {
+        media = await uploadBase64Images(mediaFiles, 'chat_media');
+      }
+      if((!media || media.length === 0) && !text) {
+        return socket.emit("message-error", "Message cannot be empty");
+      }
+      //Save message to DB
       const newMessage = await Message.create({
         senderId,
         receiverId,
         text,
-        mediaUrl,
+        media
       });
 
+      //Send to receiver if online
       const receiverSocketId = onlineUsers.get(receiverId);
       if (receiverSocketId) {
         io.to(receiverSocketId).emit("receive-message", newMessage);

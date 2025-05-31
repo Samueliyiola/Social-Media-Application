@@ -1,46 +1,952 @@
-<!-- test-client.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Socket Test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Messaging Test Client</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        input, textarea, button, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .connected {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        .disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        .auth-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .user-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .messages {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 2px solid #e1e5e9;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            background: white;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .message.sent {
+            border-left-color: #28a745;
+            background: #f0fff4;
+        }
+        .message.received {
+            border-left-color: #17a2b8;
+            background: #f0f8ff;
+        }
+        .message.system {
+            border-left-color: #ffc107;
+            background: #fffbf0;
+        }
+        .message.error {
+            border-left-color: #dc3545;
+            background: #fff5f5;
+        }
+        .message-time {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+        .users-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin-bottom: 5px;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .user-item:hover {
+            background: #f0f0f0;
+        }
+        .user-item.online {
+            border-left: 4px solid #28a745;
+        }
+        .user-item.offline {
+            border-left: 4px solid #6c757d;
+        }
+        .typing-indicator {
+            font-style: italic;
+            color: #666;
+            padding: 5px 0;
+        }
+        .image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .preview-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .preview-remove {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .message-media {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .message-media img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .message-media img:hover {
+            transform: scale(1.05);
+        }
+        .file-upload-area {
+            border: 2px dashed #e1e5e9;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: border-color 0.3s;
+            cursor: pointer;
+        }
+        .file-upload-area:hover {
+            border-color: #667eea;
+        }
+        .file-upload-area.dragover {
+            border-color: #667eea;
+            background-color: #f8f9ff;
+        }
+        h1, h2, h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
-  <h2>Socket Chat Test</h2>
-  <input type="text" id="receiverId" placeholder="Receiver ID" />
-  <input type="text" id="message" placeholder="Message" />
-  <button onclick="sendMessage()">Send</button>
+    <h1>🚀 Real-time Messaging Test Client</h1>
+    
+    <!-- Authentication Section -->
+    <div class="container auth-section" id="authSection">
+        <h3>🔐 Authentication</h3>
+        
+        <div class="input-group">
+            <label for="apiUrl">API Base URL:</label>
+            <input type="text" id="apiUrl" value="http://localhost:3000" placeholder="Enter API base URL">
+        </div>
+        
+        <div class="grid">
+            <div>
+                <h4>Login</h4>
+                <div class="input-group">
+                    <label for="loginEmail">Email:</label>
+                    <input type="email" id="loginEmail" placeholder="Enter your email">
+                </div>
+                <div class="input-group">
+                    <label for="loginPassword">Password:</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password">
+                </div>
+                <button onclick="login()" id="loginBtn">Login</button>
+            </div>
+            
+            <div>
+                <h4>Register</h4>
+                <div class="input-group">
+                    <label for="registerName">Name:</label>
+                    <input type="text" id="registerName" placeholder="Enter your name">
+                </div>
+                <div class="input-group">
+                    <label for="registerEmail">Email:</label>
+                    <input type="email" id="registerEmail" placeholder="Enter your email">
+                </div>
+                <div class="input-group">
+                    <label for="registerPassword">Password:</label>
+                    <input type="password" id="registerPassword" placeholder="Enter your password">
+                </div>
+                <button onclick="register()" id="registerBtn" class="btn-secondary">Register</button>
+            </div>
+        </div>
+    </div>
 
-  <pre id="log"></pre>
+    <!-- Main App Section -->
+    <div id="mainApp" class="hidden">
+        <!-- User Info & Status -->
+        <div class="container">
+            <div id="userInfo" class="user-info"></div>
+            <div id="status" class="status disconnected">
+                Status: Not Connected
+            </div>
+            <button id="connectBtn" onclick="connectSocket()">Connect to Socket</button>
+            <button id="disconnectBtn" onclick="disconnectSocket()" disabled>Disconnect</button>
+            <button onclick="logout()" class="btn-danger">Logout</button>
+        </div>
 
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  <script>
-    const token = "YOUR_VALID_JWT_TOKEN_HERE";
+        <div class="grid">
+            <!-- Users & Conversations -->
+            <div class="container">
+                <h3>👥 Users & Conversations</h3>
+                <button onclick="loadUsers()" class="btn-secondary">Refresh Users</button>
+                <div id="usersList" class="users-list">
+                    <div class="loading">Click "Refresh Users" to load users</div>
+                </div>
+            </div>
 
-    const socket = io("http://localhost:3000", {
-      auth: {
-        token
-      }
-    });
+            <!-- Send Message -->
+            <div class="container">
+                <h3>💬 Send Message</h3>
+                <div class="input-group">
+                    <label for="receiverId">Send to:</label>
+                    <select id="receiverId">
+                        <option value="">Select a user</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="messageText">Message:</label>
+                    <textarea id="messageText" rows="3" placeholder="Type your message..." oninput="handleTyping()"></textarea>
+                </div>
+                
+                <div class="input-group">
+                    <label for="mediaFiles">Upload Images (optional):</label>
+                    <input type="file" id="mediaFiles" multiple accept="image/*" onchange="handleFileSelection()">
+                    <div id="imagePreview" class="image-preview"></div>
+                </div>
+                
+                <button id="sendBtn" onclick="sendMessage()" disabled>Send Message</button>
+            </div>
+        </div>
 
-    socket.on("connect", () => log("✅ Connected"));
-    socket.on("message-sent", (msg) => log("✅ Sent: " + JSON.stringify(msg)));
-    socket.on("receive-message", (msg) => log("📨 Received: " + JSON.stringify(msg)));
-    socket.on("user-online", (id) => log(`👤 User online: ${id}`));
-    socket.on("user-offline", (id) => log(`👤 User offline: ${id}`));
-    socket.on("connect_error", (err) => log("❌ Connect error: " + err.message));
+        <!-- Messages -->
+        <div class="container">
+            <h3>📨 Messages & Events</h3>
+            <div class="input-group">
+                <button onclick="loadMessages()">Load My Messages</button>
+                <button onclick="clearMessages()">Clear Display</button>
+            </div>
+            <div id="typingIndicator" class="typing-indicator"></div>
+            <div id="messages" class="messages">
+                <div class="loading">Messages will appear here...</div>
+            </div>
+        </div>
 
-    function sendMessage() {
-      const receiverId = document.getElementById("receiverId").value;
-      const text = document.getElementById("message").value;
+        <!-- Actions -->
+        <div class="container">
+            <h3>⚡ Quick Actions</h3>
+            <div class="input-group">
+                <label for="messageId">Message ID (for mark as seen):</label>
+                <input type="text" id="messageId" placeholder="Enter message ID from messages above">
+            </div>
+            <button onclick="markSeen()" disabled id="markSeenBtn">Mark as Seen</button>
+        </div>
+    </div>
 
-      socket.emit("send-message", { receiverId, text, mediaUrl: null });
-    }
+    <script>
+        let socket = null;
+        let isConnected = false;
+        let currentUser = null;
+        let apiToken = null;
+        let apiBaseUrl = 'http://localhost:9000';
+        let typingTimeout = null;
+        let onlineUsers = new Set();
 
-    function log(message) {
-      const logEl = document.getElementById("log");
-      logEl.textContent += message + "\n";
-    }
-  </script>
+        let selectedFiles = [];
+
+        // Authentication Functions
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            apiBaseUrl = document.getElementById('apiUrl').value;
+
+            if (!email || !password) {
+                alert('Please enter email and password');
+                return;
+            }
+
+            try {
+                document.getElementById('loginBtn').disabled = true;
+                document.getElementById('loginBtn').textContent = 'Logging in...';
+
+                const response = await fetch(`${apiBaseUrl}/api/v1/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                console.log('Login response:', data);
+                if (response.ok) {
+                    apiToken = data.token;
+                    currentUser = data.user;
+                    showMainApp();
+                    addMessage('system', `Welcome back, ${currentUser.username || currentUser.email}!`);
+                } else {
+                    alert(data.message || 'Login failed');
+                }
+            } catch (error) {
+                console.log('Login error:', error);
+                alert('Login failed. Please check your connection and API URL.');
+            } finally {
+                document.getElementById('loginBtn').disabled = false;
+                document.getElementById('loginBtn').textContent = 'Login';
+            }
+        }
+
+        async function register() {
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            apiBaseUrl = document.getElementById('apiUrl').value;
+
+            if (!name || !email || !password) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            try {
+                document.getElementById('registerBtn').disabled = true;
+                document.getElementById('registerBtn').textContent = 'Registering...';
+
+                const response = await fetch(`${apiBaseUrl}/api/v1/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Registration successful! Please login.');
+                    // Clear register form
+                    document.getElementById('registerName').value = '';
+                    document.getElementById('registerEmail').value = '';
+                    document.getElementById('registerPassword').value = '';
+                } else {
+                    alert(data.message || 'Registration failed');
+                }
+            } catch (error) {
+                console.error('Register error:', error);
+                alert('Registration failed. Please check your connection and API URL.');
+            } finally {
+                document.getElementById('registerBtn').disabled = false;
+                document.getElementById('registerBtn').textContent = 'Register';
+            }
+        }
+
+        function logout() {
+            if (socket) {
+                socket.disconnect();
+            }
+            apiToken = null;
+            currentUser = null;
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            
+            // Clear forms
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+
+        function showMainApp() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            
+            // Update user info
+            document.getElementById('userInfo').innerHTML = `
+                <strong>Logged in as:</strong> ${currentUser.name || currentUser.email}<br>
+                <strong>User ID:</strong> ${currentUser.id || currentUser._id}
+            `;
+        }
+
+        // Socket Functions
+        function connectSocket() {
+            if (!apiToken) {
+                alert('Please login first');
+                return;
+            }
+
+            socket = io(apiBaseUrl, {
+                auth: {
+                    token: apiToken
+                }
+            });
+
+            socket.on('connect', () => {
+                isConnected = true;
+                updateStatus('Connected to Socket Server', true);
+                updateButtons();
+                addMessage('system', '🟢 Connected to real-time messaging');
+            });
+
+            socket.on('disconnect', () => {
+                isConnected = false;
+                updateStatus('Disconnected from Socket Server', false);
+                updateButtons();
+                addMessage('system', '🔴 Disconnected from real-time messaging');
+            });
+
+            socket.on('connect_error', (error) => {
+                addMessage('error', `❌ Connection error: ${error.message}`);
+                updateStatus('Connection Failed', false);
+            });
+
+            socket.on('receive-message', (message) => {
+                const mediaDisplay = message.media && message.media.length > 0 
+                    ? ` [${message.media.length} image(s)]` 
+                    : '';
+                addMessage('received', `📨 From ${message.senderId}: ${message.text}${mediaDisplay}`, message);
+                // Auto-mark as seen (optional)
+                if (message._id || message.id) {
+                    socket.emit('mark-seen', { messageId: message._id || message.id });
+                }
+            });
+
+            socket.on('message-sent', (message) => {
+                const mediaDisplay = message.media && message.media.length > 0 
+                    ? ` [${message.media.length} image(s)]` 
+                    : '';
+                addMessage('sent', `✅ Sent to ${message.receiverId}: ${message.text}${mediaDisplay}`, message);
+            });
+
+            socket.on('message-error', (error) => {
+                addMessage('error', `❌ Message error: ${error}`);
+            });
+
+            socket.on('user-online', (userId) => {
+                onlineUsers.add(userId);
+                addMessage('system', `🟢 ${userId} came online`);
+                updateUsersList();
+            });
+
+            socket.on('user-offline', (userId) => {
+                onlineUsers.delete(userId);
+                addMessage('system', `⚫ ${userId} went offline`);
+                updateUsersList();
+            });
+
+            socket.on('user-typing', ({ userId, isTyping }) => {
+                const indicator = document.getElementById('typingIndicator');
+                if (isTyping) {
+                    indicator.textContent = `${userId} is typing...`;
+                } else {
+                    indicator.textContent = '';
+                }
+            });
+
+            socket.on('error', (error) => {
+                addMessage('error', `❌ Socket error: ${error.error || error}`);
+            });
+        }
+
+        function disconnectSocket() {
+            if (socket) {
+                socket.disconnect();
+            }
+        }
+
+        // API Functions
+        async function loadUsers() {
+            if (!apiToken) return;
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/api/users`, {
+                    headers: {
+                        'Authorization': `Bearer ${apiToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const users = await response.json();
+                    updateUsersList(users);
+                    updateReceiverSelect(users);
+                } else {
+                    addMessage('error', 'Failed to load users');
+                }
+            } catch (error) {
+                console.error('Load users error:', error);
+                addMessage('error', 'Error loading users');
+            }
+        }
+
+        async function loadMessages() {
+            if (!apiToken) return;
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/api/messages`, {
+                    headers: {
+                        'Authorization': `Bearer ${apiToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const messages = await response.json();
+                    displayApiMessages(messages);
+                } else {
+                    addMessage('error', 'Failed to load messages');
+                }
+            } catch (error) {
+                console.error('Load messages error:', error);
+                addMessage('error', 'Error loading messages');
+            }
+        }
+
+        // UI Update Functions
+        function updateUsersList(users = []) {
+            const usersList = document.getElementById('usersList');
+            
+            if (users.length === 0) {
+                usersList.innerHTML = '<div class="loading">No users found or click Refresh Users</div>';
+                return;
+            }
+
+            usersList.innerHTML = users.map(user => {
+                const userId = user.id || user._id;
+                const isOnline = onlineUsers.has(userId);
+                return `
+                    <div class="user-item ${isOnline ? 'online' : 'offline'}" onclick="selectReceiver('${userId}')">
+                        <div>
+                            <strong>${user.name || user.email}</strong><br>
+                            <small>ID: ${userId}</small>
+                        </div>
+                        <div>${isOnline ? '🟢 Online' : '⚫ Offline'}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateReceiverSelect(users = []) {
+            const select = document.getElementById('receiverId');
+            select.innerHTML = '<option value="">Select a user</option>';
+            
+            users.forEach(user => {
+                const userId = user.id || user._id;
+                if (userId !== (currentUser.id || currentUser._id)) {
+                    select.innerHTML += `<option value="${userId}">${user.name || user.email}</option>`;
+                }
+            });
+        }
+
+        function selectReceiver(userId) {
+            document.getElementById('receiverId').value = userId;
+        }
+
+        function displayApiMessages(messages) {
+            const messagesEl = document.getElementById('messages');
+            messagesEl.innerHTML = '';
+            
+            messages.forEach(message => {
+                const isSent = message.senderId === (currentUser.id || currentUser._id);
+                const mediaDisplay = message.media && message.media.length > 0 
+                    ? ` [${message.media.length} image(s)]` 
+                    : '';
+                addMessage(isSent ? 'sent' : 'received', 
+                    `${isSent ? 'You' : message.senderId} → ${isSent ? message.receiverId : 'You'}: ${message.text}${mediaDisplay}`, 
+                    message);
+            });
+        }
+
+        // File Handling Functions
+        function handleFileSelection() {
+            const fileInput = document.getElementById('mediaFiles');
+            selectedFiles = Array.from(fileInput.files);
+            displayImagePreview();
+        }
+
+        function displayImagePreview() {
+            const previewContainer = document.getElementById('imagePreview');
+            previewContainer.innerHTML = '';
+
+            selectedFiles.forEach((file, index) => {
+                const previewItem = document.createElement('div');
+                previewItem.className = 'preview-item';
+
+                const img = document.createElement('img');
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'preview-remove';
+                removeBtn.innerHTML = '×';
+                removeBtn.onclick = () => removeSelectedFile(index);
+
+                previewItem.appendChild(img);
+                previewItem.appendChild(removeBtn);
+                previewContainer.appendChild(previewItem);
+            });
+        }
+
+        function removeSelectedFile(index) {
+            selectedFiles.splice(index, 1);
+            displayImagePreview();
+            
+            // Update file input
+            const fileInput = document.getElementById('mediaFiles');
+            const dt = new DataTransfer();
+            selectedFiles.forEach(file => dt.items.add(file));
+            fileInput.files = dt.files;
+        }
+
+        async function convertFilesToBase64(files) {
+            const base64Files = [];
+            
+            for (const file of files) {
+                if (!file.type.startsWith('image/')) {
+                    continue; // Skip non-image files
+                }
+                
+                const base64 = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsDataURL(file);
+                });
+                
+                base64Files.push({
+                    data: base64,
+                    name: file.name,
+                    type: file.type,
+                    size: file.size
+                });
+            }
+            
+            return base64Files;
+        }
+
+        // Message Functions
+        async function sendMessage() {
+            if (!isConnected) {
+                alert('Not connected to socket server');
+                return;
+            }
+
+            const receiverId = document.getElementById('receiverId').value;
+            const text = document.getElementById('messageText').value;
+
+            if (!receiverId) {
+                alert('Please select a receiver');
+                return;
+            }
+
+            if (!text && selectedFiles.length === 0) {
+                alert('Please enter message text or select images to send');
+                return;
+            }
+
+            try {
+                // Show sending state
+                const sendBtn = document.getElementById('sendBtn');
+                sendBtn.disabled = true;
+                sendBtn.textContent = 'Sending...';
+
+                // Convert files to base64
+                const mediaFiles = selectedFiles.length > 0 ? await convertFilesToBase64(selectedFiles) : [];
+
+                socket.emit('send-message', {
+                    receiverId,
+                    text,
+                    mediaFiles
+                });
+
+                // Clear form
+                document.getElementById('messageText').value = '';
+                selectedFiles = [];
+                document.getElementById('mediaFiles').value = '';
+                document.getElementById('imagePreview').innerHTML = '';
+
+            } catch (error) {
+                console.error('Error sending message:', error);
+                addMessage('error', 'Failed to send message');
+            } finally {
+                // Reset button
+                const sendBtn = document.getElementById('sendBtn');
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send Message';
+            }
+        }
+
+        function handleTyping() {
+            const receiverId = document.getElementById('receiverId').value;
+            if (!receiverId || !isConnected) return;
+
+            socket.emit('typing', { receiverId, isTyping: true });
+
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                socket.emit('typing', { receiverId, isTyping: false });
+            }, 1000);
+        }
+
+        function markSeen() {
+            if (!isConnected) {
+                alert('Not connected to socket server');
+                return;
+            }
+
+            const messageId = document.getElementById('messageId').value;
+            if (!messageId) {
+                alert('Please enter a message ID');
+                return;
+            }
+
+            socket.emit('mark-seen', { messageId });
+            addMessage('system', `✅ Marked message ${messageId} as seen`);
+            document.getElementById('messageId').value = '';
+        }
+
+        // Utility Functions
+        function updateStatus(status, connected) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = `Status: ${status}`;
+            statusEl.className = `status ${connected ? 'connected' : 'disconnected'}`;
+        }
+
+        function updateButtons() {
+            document.getElementById('connectBtn').disabled = isConnected;
+            document.getElementById('disconnectBtn').disabled = !isConnected;
+            document.getElementById('sendBtn').disabled = !isConnected;
+            document.getElementById('markSeenBtn').disabled = !isConnected;
+        }
+
+        function addMessage(type, text, data = null) {
+            const messagesEl = document.getElementById('messages');
+            
+            // Remove loading message
+            const loading = messagesEl.querySelector('.loading');
+            if (loading) loading.remove();
+            
+            const messageEl = document.createElement('div');
+            messageEl.className = `message ${type}`;
+            
+            const time = new Date().toLocaleTimeString();
+            
+            // Handle media display
+            let mediaHtml = '';
+            if (data && data.media && data.media.length > 0) {
+                mediaHtml = '<div class="message-media">';
+                data.media.forEach(mediaItem => {
+                    if (mediaItem.url) {
+                        mediaHtml += `<img src="${mediaItem.url}" alt="Message image" onclick="window.open('${mediaItem.url}', '_blank')" title="Click to view full size">`;
+                    }
+                });
+                mediaHtml += '</div>';
+            }
+            
+            messageEl.innerHTML = `
+                <div>${text}</div>
+                ${mediaHtml}
+                <div class="message-time">${time}</div>
+                ${data ? `<details style="margin-top: 10px;">
+                    <summary style="cursor: pointer; color: #666;">View Details</summary>
+                    <pre style="font-size: 0.8em; margin-top: 5px; background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto;">${JSON.stringify(data, null, 2)}</pre>
+                </details>` : ''}
+            `;
+            
+            messagesEl.appendChild(messageEl);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        function clearMessages() {
+            document.getElementById('messages').innerHTML = '<div class="loading">Messages cleared...</div>';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Auto-focus on email field
+            document.getElementById('loginEmail').focus();
+            
+            // Enter key handlers
+            document.getElementById('loginPassword').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') login();
+            });
+            
+            document.getElementById('registerPassword').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') register();
+            });
+            
+            document.getElementById('messageText').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && e.ctrlKey) sendMessage();
+            });
+
+            // Setup drag and drop for file upload
+            const fileInput = document.getElementById('mediaFiles');
+            const messageTextArea = document.getElementById('messageText');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                messageTextArea.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                messageTextArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                messageTextArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            messageTextArea.addEventListener('drop', handleDrop, false);
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            function highlight(e) {
+                messageTextArea.classList.add('dragover');
+            }
+
+            function unhighlight(e) {
+                messageTextArea.classList.remove('dragover');
+            }
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+
+                // Add dropped files to selected files
+                const newFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+                selectedFiles = [...selectedFiles, ...newFiles];
+                
+                // Update file input
+                const dataTransfer = new DataTransfer();
+                selectedFiles.forEach(file => dataTransfer.items.add(file));
+                fileInput.files = dataTransfer.files;
+                
+                displayImagePreview();
+            }
+        });
+    </script>
 </body>
 </html>
+
+
+
+

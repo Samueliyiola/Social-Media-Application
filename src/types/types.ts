@@ -31,8 +31,8 @@ export interface ValidationSchema {
 
 // Define the UserPayload interface for JWT payload
 export interface UserPayload {
-  _id: string; // User ID
+  userId: string; // User ID
   email: string; // User email
-  // iat?: number; // Issued at time (optional)
-  // exp?: number; // Expiration time (optional)
+  iat?: number; // Issued at time (optional)
+  exp?: number; // Expiration time (optional)
 }

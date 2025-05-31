@@ -68,6 +68,27 @@ export const deleteImages = (publicIds: string[] | string): Promise<void> => {
 };
 
 
+export const uploadBase64Images = async (
+  base64Strings: string[],
+  folder = 'post_media'
+): Promise<{ url: string; public_id: string }[]> => {
+  const uploads = base64Strings.map((base64) => {
+    return new Promise<{ url: string; public_id: string }>((resolve, reject) => {
+      cloudinary.uploader.upload(
+        base64,
+        { folder },
+        (error, result) => {
+          if (error || !result) return reject(error || new Error('Upload failed'));
+          resolve({ url: result.secure_url, public_id: result.public_id });
+        }
+      );
+    });
+  });
+
+  return Promise.all(uploads);
+};
+
+
 
 // // services/cloudinaryService.ts
 // import cloudinary from '../config/cloudinary.js';

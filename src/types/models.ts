@@ -47,7 +47,7 @@ export interface IUser extends Document {
     senderId: string;
     receiverId: string;
     text: string;
-    mediaUrl?: string;
+    media?: { url: string; public_id: string }[];
     createdAt?: Date;
     seen?: boolean;
     deleted?: boolean;

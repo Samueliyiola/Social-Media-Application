@@ -103,7 +103,7 @@
         
         <div class="input-group">
             <label for="serverUrl">Server URL:</label>
-            <input type="text" id="serverUrl" value="http://localhost:3000" placeholder="Enter server URL">
+            <input type="text" id="serverUrl" value="http://localhost:9000" placeholder="Enter server URL">
         </div>
         
         <div class="input-group">
@@ -205,6 +205,10 @@
 
             socket.on('error', (error) => {
                 addMessage('error', `Error: ${error}`);
+            });
+
+            socket.on('message-error', (error) => {
+                addMessage('error', `Message error: ${error}`);
             });
         }
 
