@@ -400,15 +400,17 @@
                 console.log('Login response:', data);
                 if (response.ok) {
                     apiToken = data.token;
-                    currentUser = data.user;
+                    currentUser = data.data;
+                    alert(data.data.email);
                     showMainApp();
-                    addMessage('system', `Welcome back, ${currentUser.username || currentUser.email}!`);
+                    addMessage('system', `Welcome back, ${currentUser.email}!`);
                 } else {
                     alert(data.message || 'Login failed');
                 }
             } catch (error) {
                 console.log('Login error:', error);
-                alert('Login failed. Please check your connection and API URL.');
+                alert(error);
+                // alert('Login failed. Please check your connection and API URL.');
             } finally {
                 document.getElementById('loginBtn').disabled = false;
                 document.getElementById('loginBtn').textContent = 'Login';
@@ -478,7 +480,7 @@
             
             // Update user info
             document.getElementById('userInfo').innerHTML = `
-                <strong>Logged in as:</strong> ${currentUser.name || currentUser.email}<br>
+                <strong>Logged in as:</strong> ${currentUser.email}<br>
                 <strong>User ID:</strong> ${currentUser.id || currentUser._id}
             `;
         }
