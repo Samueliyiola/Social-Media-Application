@@ -49,7 +49,13 @@ const messageController = {
         responseHandler.success(res, HttpStatus.OK, { message: "Message marked as seen successfully", messageSeen });
     }),
 
-
+    getAllMessages : catchAsync(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+        const messages = await Message.find({});
+        if (!messages || messages.length === 0) {
+            return responseHandler.success(res, HttpStatus.OK, { message: "No messages found", messages: [] });
+        }
+        return responseHandler.success(res, HttpStatus.OK, { message: "Messages fetched successfully", messages });
+    })
     // sendMessage: catchAsync(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     //     if(!res.locals.user) {
     //         return next(new AppError("You are not authorized to do this!", HttpStatus.UNAUTHORIZED));

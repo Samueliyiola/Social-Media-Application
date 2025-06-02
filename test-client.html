@@ -254,7 +254,7 @@
         
         <div class="input-group">
             <label for="apiUrl">API Base URL:</label>
-            <input type="text" id="apiUrl" value="http://localhost:3000" placeholder="Enter API base URL">
+            <input type="text" id="apiUrl" value="http://localhost:9000" placeholder="Enter API base URL">
         </div>
         
         <div class="grid">
@@ -262,7 +262,7 @@
                 <h4>Login</h4>
                 <div class="input-group">
                     <label for="loginEmail">Email:</label>
-                    <input type="email" id="loginEmail" placeholder="Enter your email">
+                    <input type="email" id="loginEmail" placeholder="Enter your email" value="lordsongs@example.com">
                 </div>
                 <div class="input-group">
                     <label for="loginPassword">Password:</label>
@@ -319,7 +319,7 @@
                 <div class="input-group">
                     <label for="receiverId">Send to:</label>
                     <select id="receiverId">
-                        <option value="">Select a user</option>
+                        <option value="">Select a user</option> 
                     </select>
                 </div>
                 
@@ -396,16 +396,17 @@
                     body: JSON.stringify({ email, password })
                 });
 
-                const data = await response.json();
-                console.log('Login response:', data);
+                const responseData = await response.json();
+                // console.log('Login response:', data);
                 if (response.ok) {
-                    apiToken = data.token;
-                    currentUser = data.data;
-                    alert(data.data.email);
+                    apiToken = responseData.token;
+                    currentUser = responseData.user;
+                    // console.log('Login successful:', currentUser);
+                    alert(currentUser.email);
                     showMainApp();
                     addMessage('system', `Welcome back, ${currentUser.email}!`);
                 } else {
-                    alert(data.message || 'Login failed');
+                    alert(responseData.message || 'Login failed');
                 }
             } catch (error) {
                 console.log('Login error:', error);
@@ -576,7 +577,7 @@
             if (!apiToken) return;
 
             try {
-                const response = await fetch(`${apiBaseUrl}/api/users`, {
+                const response = await fetch(`${apiBaseUrl}/api/v1/users`, {
                     headers: {
                         'Authorization': `Bearer ${apiToken}`
                     }
@@ -626,7 +627,7 @@
                 return;
             }
 
-            usersList.innerHTML = users.map(user => {
+            usersList.innerHTML = users.data.users.map(user => {
                 const userId = user.id || user._id;
                 const isOnline = onlineUsers.has(userId);
                 return `
@@ -648,7 +649,7 @@
             users.forEach(user => {
                 const userId = user.id || user._id;
                 if (userId !== (currentUser.id || currentUser._id)) {
-                    select.innerHTML += `<option value="${userId}">${user.name || user.email}</option>`;
+                    select.innerHTML += `<option value="${userId}">${user.username || user.email}</option>`;
                 }
             });
         }
@@ -748,7 +749,17 @@
                 alert('Not connected to socket server');
                 return;
             }
-
+            const getUsers = await fetch(`${apiBaseUrl}/api/v1/users`, {
+                headers: { 'Authorization': `Bearer ${apiToken}` }
+            });	
+            
+            if (!getUsers.ok) {
+                alert('Failed to fetch users');
+                return;
+            }
+            const users = await getUsers.json();
+            console.log(users);
+            // updateUsersList(users._id, users.email);
             const receiverId = document.getElementById('receiverId').value;
             const text = document.getElementById('messageText').value;
 

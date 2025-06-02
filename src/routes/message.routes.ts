@@ -7,5 +7,6 @@ const messageRouter = Router();
 
 messageRouter.get('/:receiverId', verifyUser, controllerHandler(messageController.getConversation));
 messageRouter.post('/:id/mark-seen', verifyUser, controllerHandler(messageController.markMessageAsSeen));
+// messageRouter.get("/", controllerHandler(messageController.getAllMessages));
 
 export default messageRouter;
